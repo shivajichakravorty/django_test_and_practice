@@ -1,17 +1,29 @@
 from django.shortcuts import render
-
+from math import ceil
 from .models import Product
 
 
 def index(request):
     # Fetch all products from the database
     all_products = Product.objects.all()
-
-    # This logic groups the products into slides for the carousel
     n = len(all_products)
-    product_slides = [all_products[i:i + 3] for i in range(0, n, 3)]
+    if n == 0:
+        return render(request, 'shop/index.html', {'all_carousels': []})
 
-    context = {'product_slides': product_slides}
+    # Define how many products per slide (matches col-md-4 for 3 columns)
+    items_per_slide = 3
+    nSlides = ceil(n / items_per_slide)
+
+    # Group all products into slides
+    product_slides = [all_products[i:i + items_per_slide] for i in range(0, n, items_per_slide)]
+
+    # Prepare the data for two carousels, each containing all products
+    all_carousels = [
+        {'title': 'Featured Products', 'slides': product_slides, 'range': range(nSlides)},
+        {'title': 'New Arrivals', 'slides': product_slides, 'range': range(nSlides)}
+    ]
+
+    context = {'all_carousels': all_carousels}
     return render(request, 'shop/index.html', context)
 
 def about(request):
