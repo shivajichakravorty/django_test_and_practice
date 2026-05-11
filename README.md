@@ -1,6 +1,8 @@
 **Revising Django by making two apps - Shop and Blog for an Ecommerce website. 
 Updating on GitHub daily updates to the project for my reference. **
 
+Added cart icon on Navbar with current items in cart count. 
+
 Made the home page with different categories. 
 Carousel for each category
 Implemented cart logic not the cart page yet. - May 11, 2026
