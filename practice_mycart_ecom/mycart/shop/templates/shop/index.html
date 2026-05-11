@@ -42,7 +42,12 @@ Page{% endblock%} {% block content %}
                 <p class="card-text flex-grow-1">
                   {{ product.desc|slice:":60" }}...
                 </p>
-                <a href="#" class="btn btn-primary mt-auto">Add to Cart</a>
+                <button
+                  id="pr{{product.id}}"
+                  class="btn btn-primary mt-auto addtocart"
+                >
+                  Add to Cart
+                </button>
               </div>
             </div>
           </div>
@@ -75,4 +80,24 @@ Page{% endblock%} {% block content %}
 
   {% endfor %}
 </div>
+{% endblock %} {% block js %}
+<script>
+  // console.log("Custom JS for shop/index.html loaded");
+  if (localStorage.getItem("cart") === null) {
+    var cart = {};
+  } else {
+    cart = JSON.parse(localStorage.getItem("cart"));
+    // console.log(cart);
+  }
+  $(".addtocart").click(function () {
+    var idstr = this.id.toString();
+    // console.log(idstr);
+    if (cart[idstr] != undefined) {
+      cart[idstr] = cart[idstr] + 1;
+    } else {
+      cart[idstr] = 1;
+    }
+    localStorage.setItem("cart", JSON.stringify(cart));
+  });
+</script>
 {% endblock %}
