@@ -1,5 +1,9 @@
-Revising Django by making two apps - Shop and Blog for an Ecommerce website. 
-Updating on GitHub daily updates to the project for my reference. 
+**Revising Django by making two apps - Shop and Blog for an Ecommerce website. 
+Updating on GitHub daily updates to the project for my reference. **
+
+Made the home page with different categories. 
+Carousel for each category
+Implemented cart logic not the cart page yet. - May 11, 2026
 
 Pipelining is completed, will implement models next. 
 
