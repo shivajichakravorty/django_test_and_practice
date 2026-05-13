@@ -20,12 +20,14 @@ Page{% endblock%} {% block content %}
           <div
             class="d-flex justify-content-between align-items-center mt-auto"
           >
-            <button
-              id="pr{{product.id}}"
-              class="btn btn-sm btn-primary addtocart"
-            >
-              Add to Cart
-            </button>
+            <span id="divpr{{product.id}}">
+              <button
+                id="pr{{product.id}}"
+                class="btn btn-sm btn-primary addtocart"
+              >
+                Add to Cart
+              </button>
+            </span>
             <a
               class="btn btn-sm btn-secondary"
               href="/shop/productview/{{ product.id }}"

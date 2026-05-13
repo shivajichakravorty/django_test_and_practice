@@ -17,9 +17,12 @@
       <p><strong>Price:</strong> ${{ product.price }}</p>
       <p>{{ product.desc }}</p>
       <hr />
-      <button id="pr{{product.id}}" class="btn btn-primary addtocart">
-        Add to Cart
-      </button>
+      <span id="divpr{{product.id}}">
+        <button id="pr{{product.id}}" class="btn btn-primary addtocart">
+          Add to Cart
+        </button>
+      </span>
+      <button class="btn btn-primary buynow">Buy Now</button>
       <a href="/shop/checkout" class="btn btn-secondary">Checkout</a>
     </div>
   </div>

@@ -3,5 +3,63 @@
 {% extends "shop/basic.html" %}
 {% block title %}Contact Us - My Cart{% endblock %}
 {% block content %}
-
+<div class="container my-4">
+  <h2>Contact Us</h2>
+  <p>
+    If you have any questions or need assistance, please feel free to contact
+    us:
+  </p>
+  <ul>
+    <li>Email: support@mycart.com</li>
+  </ul>
+  <h2>Please share your query and contact details below</h2>
+  <hr />
+  <form action="/shop/contact/" method="POST">
+    {% csrf_token %}
+    <div class="mb-3">
+      <label for="name" class="form-label">Name</label>
+      <input
+        type="text"
+        class="form-control"
+        id="name"
+        name="name"
+        placeholder="Enter your name"
+        required
+      />
+    </div>
+    <div class="mb-3">
+      <label for="email" class="form-label">Email</label>
+      <input
+        type="email"
+        class="form-control"
+        id="email"
+        name="email"
+        placeholder="Enter your contact email ID"
+        required
+      />
+    </div>
+    <div class="mb-3">
+      <label for="phone" class="form-label">Phone Number</label>
+      <input
+        type="tel"
+        class="form-control"
+        id="phone"
+        name="phone"
+        placeholder="Enter your contact phone number"
+      />
+    </div>
+    <div class="mb-3">
+      <label for="query" class="form-label">Your Query</label>
+      <textarea
+        class="form-control"
+        id="query"
+        name="query"
+        rows="4"
+        placeholder="Enter your query"
+        required
+      ></textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Submit</button>
+  </form>
+</div>
 {% endblock %}

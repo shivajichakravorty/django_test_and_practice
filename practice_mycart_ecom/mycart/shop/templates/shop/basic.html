@@ -76,10 +76,10 @@
           <button
             type="button"
             class="btn btn-secondary mx-2"
+            id="popcart"
             data-bs-container="body"
             data-bs-toggle="popover"
             data-bs-placement="bottom"
-            data-bs-content="Bottom popover"
           >
             Cart (<span id="cartItemCount">0</span>)
           </button>
@@ -101,25 +101,109 @@
     ></script>
     {% block js %}
     <script>
-      // Initialize cart from localStorage
-      var cart = JSON.parse(localStorage.getItem("cart")) || {};
+      // Initialize cart from localStorage, handling null case
+      if (localStorage.getItem("cart") == null) {
+        var cart = {};
+      } else {
+        var cart = JSON.parse(localStorage.getItem("cart"));
+      }
 
-      // Add to Cart click handler
-      $(".addtocart").click(function () {
+      // --- Event Handlers using Delegation ---
+
+      // Handle Add to Cart click
+      $("body").on("click", ".addtocart", function () {
         var idstr = this.id.toString();
         cart[idstr] = (cart[idstr] || 0) + 1;
-        localStorage.setItem("cart", JSON.stringify(cart));
-        updateCartDisplay();
+        updateCartAndUI(cart, idstr);
       });
 
+      // Handle Plus button click
+      $("body").on("click", ".plus", function () {
+        var idstr = this.id.substring(4); // e.g., from 'pluspr1' to 'pr1'
+        cart[idstr] = cart[idstr] + 1;
+        updateCartAndUI(cart, idstr);
+      });
+
+      // Handle Minus button click
+      $("body").on("click", ".minus", function () {
+        var idstr = this.id.substring(5); // e.g., from 'minuspr1' to 'pr1'
+        cart[idstr] = cart[idstr] - 1;
+        if (cart[idstr] <= 0) {
+          delete cart[idstr];
+        }
+        updateCartAndUI(cart, idstr);
+      });
+
+      // --- Helper Functions ---
+
+      // Central function to update cart, storage, and UI for a specific item
+      function updateCartAndUI(cart, itemId) {
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartDisplay(cart);
+        updateButtonUI(cart, itemId);
+        updatePopover(cart);
+      }
+
+      // Updates the button for a single item based on cart state
+      function updateButtonUI(cart, itemId) {
+        var buttonContainer = document.getElementById("div" + itemId);
+        if (buttonContainer) {
+          // Check if the element exists on the page
+          var qty = cart[itemId];
+          if (qty === undefined || qty <= 0) {
+            buttonContainer.innerHTML = `<button id="${itemId}" class="btn btn-sm btn-primary addtocart">Add to Cart</button>`;
+          } else {
+            buttonContainer.innerHTML = `<button id="minus${itemId}" class='btn btn-sm btn-primary minus'>-</button> <span id='span${itemId}' class="mx-2">${qty}</span> <button id="plus${itemId}" class='btn btn-sm btn-primary plus'>+</button>`;
+          }
+        }
+      }
+
       // Function to update cart count in navbar
-      function updateCartDisplay() {
+      function updateCartDisplay(cart) {
         var totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
         $("#cartItemCount").text(totalItems);
       }
 
-      // Initial cart display update on page load
-      updateCartDisplay();
+      // Function to update the popover content
+      function updatePopover(cart) {
+        var popStr = "<ul>";
+        if (Object.keys(cart).length === 0) {
+          popStr = "Your cart is empty.";
+        } else {
+          var i = 1;
+          for (var item in cart) {
+            popStr += `<li><b>Item ${i}</b> (ID ${item.substring(2)}): Qty: ${cart[item]}</li>`;
+            i++;
+          }
+          popStr +=
+            "</ul><a href='/shop/checkout' class='btn btn-primary btn-sm mt-2'>Checkout</a>";
+        }
+
+        var popoverEl = document.getElementById("popcart");
+        var popover = bootstrap.Popover.getInstance(popoverEl);
+        if (popover) {
+          popover.setContent({ ".popover-body": popStr });
+        }
+      }
+
+      // On page load, update the UI for all items already in the cart
+      function initializeCartUI(cart) {
+        for (var item in cart) {
+          updateButtonUI(cart, item);
+        }
+      }
+
+      // Initialize Popover
+      new bootstrap.Popover(document.getElementById("popcart"), {
+        html: true,
+        title: "Your Shopping Cart",
+        content: "Loading...",
+      });
+
+      // Initial cart UI setup on page load
+      updateCartDisplay(cart);
+      initializeCartUI(cart);
+      updatePopover(cart);
     </script>
     {% endblock %}
   </body>

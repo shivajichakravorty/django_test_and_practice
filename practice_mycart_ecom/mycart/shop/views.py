@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, render
-from .models import Product
+from .models import Contact, Product
 from collections import defaultdict
 
 
@@ -22,6 +22,15 @@ def about(request):
     return render(request, 'shop/about.html')
 
 def contact(request):
+    if request.method == 'POST':
+        name = request.POST.get('name', '')
+        email = request.POST.get('email', '')
+        phone = request.POST.get('phone', '')
+        desc = request.POST.get('desc', '')
+        contact = Contact(name=name, email=email, phone=phone, desc=desc)
+        contact.save()
+    else:
+        pass
     return render(request, 'shop/contact.html')
 
 def tracker(request):
