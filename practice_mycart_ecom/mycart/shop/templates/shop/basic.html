@@ -176,7 +176,23 @@
         }
       });
 
+      // Handle Clear Cart button click (delegated)
+      $("body").on("click", "#clearCartBtn", function () {
+        clearCart();
+      });
+
       // --- Helper Functions ---
+      function clearCart() {
+        const itemsToClear = Object.keys(cart); // Get keys before clearing
+        cart = {};
+        localStorage.setItem("cart", "{}");
+        updateCartDisplay(cart);
+        // Update the UI for the items that were removed
+        for (const itemId of itemsToClear) {
+          updateButtonUI(cart, itemId); // cart is now empty, so this will reset the button
+        }
+        updatePopover(cart);
+      }
 
       function updateCartAndUI(cart, itemId) {
         localStorage.setItem("cart", JSON.stringify(cart));
@@ -218,6 +234,8 @@
           }
           popStr +=
             "</ul><a href='/shop/checkout' class='btn btn-primary btn-sm mt-2'>Checkout</a>";
+          popStr +=
+            " <button id='clearCartBtn' class='btn btn-danger btn-sm mt-2'>Clear Cart</button>";
         }
 
         var popoverEl = document.getElementById("popcart");
@@ -233,6 +251,17 @@
         }
       }
 
+      // --- Popover Initialization with Sanitizer Configuration ---
+
+      // Get Bootstrap's default allow list to extend it
+      const myDefaultAllowList = bootstrap.Popover.Default.allowList;
+
+      // Allow 'class' attribute on 'a' tags for the "Checkout" button styling
+      myDefaultAllowList.a.push("class");
+
+      // Allow 'button' tag and its 'id' and 'class' attributes for the "Clear Cart" button
+      myDefaultAllowList.button = ["id", "class"];
+
       // Initialize Popover
       const popover = new bootstrap.Popover(
         document.getElementById("popcart"),
@@ -240,6 +269,7 @@
           html: true,
           title: "Your Shopping Cart",
           content: "Loading...",
+          allowList: myDefaultAllowList, // Use our customized allow list
         },
       );
 
