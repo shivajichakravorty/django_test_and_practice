@@ -20,7 +20,10 @@ Page{% endblock%} {% block content %}
           <div
             class="d-flex justify-content-between align-items-center mt-auto"
           >
-            <span id="divpr{{product.id}}">
+            <span
+              id="divpr{{product.id}}"
+              data-name="{{ product.product_name }}"
+            >
               <button
                 id="pr{{product.id}}"
                 class="btn btn-sm btn-primary addtocart"

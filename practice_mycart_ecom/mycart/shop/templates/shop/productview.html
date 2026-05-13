@@ -17,7 +17,7 @@
       <p><strong>Price:</strong> ${{ product.price }}</p>
       <p>{{ product.desc }}</p>
       <hr />
-      <span id="divpr{{product.id}}">
+      <span id="divpr{{product.id}}" data-name="{{ product.product_name }}">
         <button id="pr{{product.id}}" class="btn btn-primary addtocart">
           Add to Cart
         </button>

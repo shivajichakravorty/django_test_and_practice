@@ -101,11 +101,32 @@
     ></script>
     {% block js %}
     <script>
-      // Initialize cart from localStorage, handling null case
-      if (localStorage.getItem("cart") == null) {
+      // Function to safely escape HTML to prevent XSS
+      function escapeHTML(str) {
+        var p = document.createElement("p");
+        p.appendChild(document.createTextNode(str || ""));
+        return p.innerHTML;
+      }
+
+      // Initialize cart from localStorage, handling null/corrupted case
+      var cart;
+      try {
+        cart = JSON.parse(localStorage.getItem("cart")) || {};
+        // Basic validation to ensure it's an object
+        if (typeof cart !== "object" || cart === null)
+          throw new Error("Cart is not an object");
+
+        // Check for old cart format (where value is a number, not an array) and reset.
+        const firstItemKey = Object.keys(cart)[0];
+        if (firstItemKey && !Array.isArray(cart[firstItemKey])) {
+          console.warn("Old cart format detected. Resetting cart.");
+          cart = {};
+          localStorage.setItem("cart", "{}");
+        }
+      } catch (e) {
+        console.error("Could not parse cart from localStorage. Resetting.", e);
         var cart = {};
-      } else {
-        var cart = JSON.parse(localStorage.getItem("cart"));
+        localStorage.setItem("cart", "{}");
       }
 
       // --- Event Handlers using Delegation ---
@@ -113,30 +134,50 @@
       // Handle Add to Cart click
       $("body").on("click", ".addtocart", function () {
         var idstr = this.id.toString();
-        cart[idstr] = (cart[idstr] || 0) + 1;
+        // Find the span with the data-name attribute
+        var name = $(this).closest("span[data-name]").data("name");
+
+        // Prevent adding to cart if name is missing
+        if (name === undefined) {
+          console.error(
+            "Could not add item to cart. Product name is missing for ID: " +
+              idstr,
+          );
+          return;
+        }
+
+        if (cart[idstr]) {
+          cart[idstr][0] += 1; // Increment quantity
+        } else {
+          // Store as [quantity, name]
+          cart[idstr] = [1, name];
+        }
         updateCartAndUI(cart, idstr);
       });
 
       // Handle Plus button click
       $("body").on("click", ".plus", function () {
         var idstr = this.id.substring(4); // e.g., from 'pluspr1' to 'pr1'
-        cart[idstr] = cart[idstr] + 1;
-        updateCartAndUI(cart, idstr);
+        if (cart[idstr]) {
+          cart[idstr][0] += 1; // Update quantity in the array
+          updateCartAndUI(cart, idstr);
+        }
       });
 
       // Handle Minus button click
       $("body").on("click", ".minus", function () {
         var idstr = this.id.substring(5); // e.g., from 'minuspr1' to 'pr1'
-        cart[idstr] = cart[idstr] - 1;
-        if (cart[idstr] <= 0) {
-          delete cart[idstr];
+        if (cart[idstr]) {
+          cart[idstr][0] -= 1; // Update quantity in the array
+          if (cart[idstr][0] <= 0) {
+            delete cart[idstr];
+          }
+          updateCartAndUI(cart, idstr);
         }
-        updateCartAndUI(cart, idstr);
       });
 
       // --- Helper Functions ---
 
-      // Central function to update cart, storage, and UI for a specific item
       function updateCartAndUI(cart, itemId) {
         localStorage.setItem("cart", JSON.stringify(cart));
         updateCartDisplay(cart);
@@ -144,36 +185,36 @@
         updatePopover(cart);
       }
 
-      // Updates the button for a single item based on cart state
       function updateButtonUI(cart, itemId) {
         var buttonContainer = document.getElementById("div" + itemId);
         if (buttonContainer) {
-          // Check if the element exists on the page
-          var qty = cart[itemId];
-          if (qty === undefined || qty <= 0) {
+          var itemData = cart[itemId];
+          if (itemData === undefined || itemData[0] <= 0) {
             buttonContainer.innerHTML = `<button id="${itemId}" class="btn btn-sm btn-primary addtocart">Add to Cart</button>`;
           } else {
+            var qty = itemData[0];
             buttonContainer.innerHTML = `<button id="minus${itemId}" class='btn btn-sm btn-primary minus'>-</button> <span id='span${itemId}' class="mx-2">${qty}</span> <button id="plus${itemId}" class='btn btn-sm btn-primary plus'>+</button>`;
           }
         }
       }
 
-      // Function to update cart count in navbar
       function updateCartDisplay(cart) {
-        var totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+        var totalItems = 0;
+        for (var item in cart) {
+          totalItems += cart[item][0]; // Sum quantities from the array
+        }
         $("#cartItemCount").text(totalItems);
       }
 
-      // Function to update the popover content
       function updatePopover(cart) {
         var popStr = "<ul>";
         if (Object.keys(cart).length === 0) {
           popStr = "Your cart is empty.";
         } else {
-          var i = 1;
           for (var item in cart) {
-            popStr += `<li><b>Item ${i}</b> (ID ${item.substring(2)}): Qty: ${cart[item]}</li>`;
-            i++;
+            var qty = cart[item][0];
+            var name = cart[item][1];
+            popStr += `<li><b>${escapeHTML(name)}</b>: Qty: ${qty}</li>`;
           }
           popStr +=
             "</ul><a href='/shop/checkout' class='btn btn-primary btn-sm mt-2'>Checkout</a>";
@@ -186,7 +227,6 @@
         }
       }
 
-      // On page load, update the UI for all items already in the cart
       function initializeCartUI(cart) {
         for (var item in cart) {
           updateButtonUI(cart, item);
@@ -194,13 +234,15 @@
       }
 
       // Initialize Popover
-      new bootstrap.Popover(document.getElementById("popcart"), {
-        html: true,
-        title: "Your Shopping Cart",
-        content: "Loading...",
-      });
+      const popover = new bootstrap.Popover(
+        document.getElementById("popcart"),
+        {
+          html: true,
+          title: "Your Shopping Cart",
+          content: "Loading...",
+        },
+      );
 
-      // Initial cart UI setup on page load
       updateCartDisplay(cart);
       initializeCartUI(cart);
       updatePopover(cart);
