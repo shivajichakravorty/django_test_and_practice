@@ -45,37 +45,21 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav me-auto mb-2 mb-lg-0">
             <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Home</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Link</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a
-                class="nav-link dropdown-toggle"
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
+              <a class="nav-link active" aria-current="page" href="/shop"
+                >Home</a
               >
-                Dropdown
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><hr class="dropdown-divider" /></li>
-                <li>
-                  <a class="dropdown-item" href="#">Something else here</a>
-                </li>
-              </ul>
             </li>
             <li class="nav-item">
-              <a class="nav-link disabled" aria-disabled="true">Disabled</a>
+              <a class="nav-link" href="/shop/about">About</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link" href="#"
-                >Cart (<span id="cartItemCount">0</span>)</a
-              >
+              <a class="nav-link" href="/shop/contact">Contact</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/shop/tracker">Tracker</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/shop/checkout">Checkout</a>
             </li>
           </ul>
           <form class="d-flex" role="search">
@@ -89,6 +73,16 @@
               Search
             </button>
           </form>
+          <button
+            type="button"
+            class="btn btn-secondary mx-2"
+            data-bs-container="body"
+            data-bs-toggle="popover"
+            data-bs-placement="bottom"
+            data-bs-content="Bottom popover"
+          >
+            Cart (<span id="cartItemCount">0</span>)
+          </button>
         </div>
       </div>
     </nav>
@@ -105,6 +99,28 @@
       integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI"
       crossorigin="anonymous"
     ></script>
-    {% block js %} {% endblock %}
+    {% block js %}
+    <script>
+      // Initialize cart from localStorage
+      var cart = JSON.parse(localStorage.getItem("cart")) || {};
+
+      // Add to Cart click handler
+      $(".addtocart").click(function () {
+        var idstr = this.id.toString();
+        cart[idstr] = (cart[idstr] || 0) + 1;
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartDisplay();
+      });
+
+      // Function to update cart count in navbar
+      function updateCartDisplay() {
+        var totalItems = Object.values(cart).reduce((a, b) => a + b, 0);
+        $("#cartItemCount").text(totalItems);
+      }
+
+      // Initial cart display update on page load
+      updateCartDisplay();
+    </script>
+    {% endblock %}
   </body>
 </html>
