@@ -7,10 +7,19 @@
 <div class="container my-4">
   <h2>Thank you for your order!</h2>
   <p>
-    Your order has been received and is being processed. We will contact you
-    shortly with the details.
+    {% if thank_you %} Your order has been successfully placed. Your order ID is
+    {{ id }}. Your order has been received and is being processed. We will
+    contact you shortly with the details of your order and the expected delivery
+    date. {% else %} There was an issue with your order. Please try again or
+    contact our support team for assistance. {% endif %}
   </p>
   <a href="/shop/" class="btn btn-primary mt-3">Continue Shopping</a>
 </div>
+<script>
+  // Clear the cart from localStorage after order confirmation
+  document.addEventListener("DOMContentLoaded", function () {
+    localStorage.removeItem("cart");
+  });
+</script>
 
 {% endblock %}

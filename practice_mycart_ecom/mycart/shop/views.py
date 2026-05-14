@@ -56,7 +56,9 @@ def checkout(request):
         order = Order(items_json=items_json, name=name, email=email, address=address, city=city, state=state, zip_code=zip_code, phone=phone)
         order.save()
         # Assuming the Order model has an 'order_id' field as primary key
-        return render(request, 'shop/order_confirmation.html')
+        thank_you = True
+        id = order.order_id
+        return render(request, 'shop/order_confirmation.html', {'thank_you': thank_you, 'id': id})
     else:
         return render(request, 'shop/checkout.html')
 
