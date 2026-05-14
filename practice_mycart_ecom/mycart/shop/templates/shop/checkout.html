@@ -3,5 +3,123 @@
 {% extends "shop/basic.html" %}
 {% block title %}Checkout - My Cart{% endblock %}
 {% block content %}
-
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-7">
+      <h2>Step 1: Review Your Cart Items</h2>
+      <div id="cartItems" class="mt-4">
+        <p>Your cart is loading...</p>
+      </div>
+    </div>
+    <div class="col-md-5">
+      <h2>Step 2: Enter Your Details</h2>
+      <form action="/shop/checkout/" method="POST" class="mt-4">
+        {% csrf_token %}
+        <input type="hidden" name="itemsJson" id="itemsJson" />
+        <div class="mb-3">
+          <label for="name" class="form-label">Name</label>
+          <input
+            type="text"
+            class="form-control"
+            id="name"
+            name="name"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            name="email"
+            required
+          />
+        </div>
+        <div class="mb-3">
+          <label for="address" class="form-label">Address</label>
+          <textarea
+            class="form-control"
+            id="address"
+            name="address"
+            rows="3"
+            required
+          ></textarea>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="city" class="form-label">City</label>
+            <input
+              type="text"
+              class="form-control"
+              id="city"
+              name="city"
+              required
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="state" class="form-label">State</label>
+            <input
+              type="text"
+              class="form-control"
+              id="state"
+              name="state"
+              required
+            />
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="zip_code" class="form-label">Zip Code</label>
+            <input
+              type="text"
+              class="form-control"
+              id="zip_code"
+              name="zip_code"
+              required
+            />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="phone" class="form-label">Phone</label>
+            <input
+              type="tel"
+              class="form-control"
+              id="phone"
+              name="phone"
+              required
+            />
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Place Order</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %} {% block js %} {{ block.super }}
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const cartItemsContainer = document.getElementById("cartItems");
+    const itemsJsonInput = document.getElementById("itemsJson");
+    const submitButton = document.querySelector('form button[type="submit"]');
+    if (typeof cart === "undefined" || Object.keys(cart).length === 0) {
+      cartItemsContainer.innerHTML =
+        "<h5>Your cart is empty.</h5><p>Please add items to your cart before checking out.</p>";
+      submitButton.disabled = true;
+      return;
+    }
+    itemsJsonInput.value = JSON.stringify(cart);
+    let cartHtml = '<ul class="list-group list-group-numbered">';
+    for (const item in cart) {
+      const [quantity, name] = cart[item];
+      cartHtml += `<li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+                <div class="fw-bold">${escapeHTML(name)}</div>
+            </div>
+            <span class="badge bg-primary rounded-pill">${quantity}</span>
+        </li>`;
+    }
+    cartHtml += "</ul>";
+    cartItemsContainer.innerHTML = cartHtml;
+  });
+</script>
 {% endblock %}

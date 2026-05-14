@@ -1,5 +1,5 @@
 from django.shortcuts import get_object_or_404, render
-from .models import Contact, Product
+from .models import Contact, Order, Product
 from collections import defaultdict
 
 
@@ -26,7 +26,7 @@ def contact(request):
         name = request.POST.get('name', '')
         email = request.POST.get('email', '')
         phone = request.POST.get('phone', '')
-        desc = request.POST.get('desc', '')
+        desc = request.POST.get('query', '')
         contact = Contact(name=name, email=email, phone=phone, desc=desc)
         contact.save()
     else:
@@ -44,4 +44,22 @@ def productview(request, myid):
     return render(request, 'shop/productview.html', {'product': product})
 
 def checkout(request):
+    if request.method == 'POST':
+        items_json = request.POST.get('itemsJson', '')
+        name = request.POST.get('name', '')
+        email = request.POST.get('email', '')
+        phone = request.POST.get('phone', '')
+        address = request.POST.get('address', '')
+        city = request.POST.get('city', '')
+        state = request.POST.get('state', '')
+        zip_code = request.POST.get('zip_code', '')
+        order = Order(items_json=items_json, name=name, email=email, address=address, city=city, state=state, zip_code=zip_code, phone=phone)
+        order.save()
+        # Assuming the Order model has an 'order_id' field as primary key
+        return render(request, 'shop/order_confirmation.html')
+    else:
+        return render(request, 'shop/checkout.html')
+
+
+
     return render(request, 'shop/checkout.html')
